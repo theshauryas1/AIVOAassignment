@@ -1,0 +1,28 @@
+FROM: r.sharma@vasudhapharma.com
+TO: qa-deviations@vasudhapharma.com
+DATE: 22-09-2024
+SUBJECT: URGENT: Process Parameter Excursion - Crystallization Reactor R-204
+
+Dear QA Team,
+
+Please log an urgent manufacturing deviation for the following event:
+
+Site / Plant: API Manufacturing Unit
+Date of Occurrence: 22-09-2024
+Source: Manufacturing
+Related Product: Amoxicillin Trihydrate API
+Batch Number: AMX-240922-04
+Affected Quantity: 150 kg wet cake
+
+Detailed Description:
+During the final precipitation and vacuum filtration stage in Reactor R-204, the agitator drive motor tripped due to an overload relay fault at 03:15 AM. Agitation remained stopped for 35 minutes while slurry was in an unmixed state, causing localized agglomeration and potential non-uniform crystal distribution. The agitator was reset and run for an additional 15 minutes to re-suspend the product before filtration.
+
+Initial Impact: Moderate
+Initial Severity: Medium
+
+Please initiate QA risk assessment and advise on sampling protocol for assay and particle size testing.
+
+Best regards,
+Ramesh Sharma
+Production Manager - API Unit 1
+Vasudha Pharma Chem Ltd.
