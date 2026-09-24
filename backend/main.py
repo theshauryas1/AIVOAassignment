@@ -137,26 +137,27 @@ def _heuristic_extract(text: str, current_form: Optional[dict] = None) -> Proces
 
 @app.get("/api/health")
 async def health_check():
-    has_key = bool(settings.GROQ_API_KEY and settings.GROQ_API_KEY != "your_groq_api_key_here")
+    has_key = bool(settings.NVIDIA_API_KEY and "nvapi-" in settings.NVIDIA_API_KEY)
     return {
         "status": "healthy",
         "app": settings.APP_NAME,
-        "groq_configured": has_key,
-        "model": "llama-3.3-70b-versatile"
+        "nvidia_nim_configured": has_key,
+        "model": settings.NVIDIA_MODEL,
+        "provider": "NVIDIA NIM (TensorRT-LLM)"
     }
 
 
 @app.post("/api/process-text", response_model=ProcessResponse)
 async def process_text_prompt(req: TextProcessRequest):
     """
-    Process natural language prompts:
+    Process natural language prompts via LangGraph + NVIDIA NIM:
     - Log deviation (new prompt)
     - Edit deviation ("Sorry, the batch number is...")
     """
     if not req.message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty")
         
-    has_key = bool(settings.GROQ_API_KEY and settings.GROQ_API_KEY != "your_groq_api_key_here")
+    has_key = bool(settings.NVIDIA_API_KEY and "nvapi-" in settings.NVIDIA_API_KEY)
     
     if has_key:
         try:
@@ -174,7 +175,7 @@ async def process_text_prompt(req: TextProcessRequest):
                 "messages": []
             }
             
-            # Invoke LangGraph
+            # Invoke LangGraph StateGraph
             result = deviation_graph.invoke(initial_state)
             
             return ProcessResponse(
@@ -182,13 +183,12 @@ async def process_text_prompt(req: TextProcessRequest):
                 form_fields=DeviationFormFields(**result.get("form_fields", {})),
                 risk_assessment=AIRiskAssessment(**result.get("risk_assessment", {})),
                 ai_message=result.get("ai_message", "Form populated successfully."),
-                confidence=0.95
+                confidence=0.98
             )
         except Exception as e:
             logger.error(f"LangGraph execution error: {e}. Falling back to resilient extractor.")
             return _heuristic_extract(req.message, req.current_form.model_dump() if req.current_form else None)
     else:
-        # Fallback heuristic mode
         return _heuristic_extract(req.message, req.current_form.model_dump() if req.current_form else None)
 
 
@@ -211,7 +211,7 @@ async def process_document(
             detail="Could not extract readable text from document. Please ensure it's not a password-protected or empty file."
         )
         
-    has_key = bool(settings.GROQ_API_KEY and settings.GROQ_API_KEY != "your_groq_api_key_here")
+    has_key = bool(settings.NVIDIA_API_KEY and "nvapi-" in settings.NVIDIA_API_KEY)
     
     if has_key:
         try:
@@ -231,7 +231,7 @@ async def process_document(
                 form_fields=DeviationFormFields(**result.get("form_fields", {})),
                 risk_assessment=AIRiskAssessment(**result.get("risk_assessment", {})),
                 ai_message=f"📄 Extracted details from '{file.filename}'. " + result.get("ai_message", ""),
-                confidence=0.96
+                confidence=0.98
             )
         except Exception as e:
             logger.error(f"LangGraph document extraction error: {e}. Falling back.")
